@@ -1,108 +1,121 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Install App</title>
+  <meta name="theme-color" content="#ffffff">
+  <title>Preparing Install</title>
+
   <style>
     * {
       box-sizing: border-box;
     }
+
     body {
       margin: 0;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      background: #0b0b0f;
-      color: #f5f5f7;
+      padding: 24px;
+      background: #fff;
+      color: #171717;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .card {
+
+    main {
       width: 100%;
-      max-width: 440px;
-      background: #15151b;
-      border: 1px solid #292933;
-      border-radius: 22px;
-      padding: 32px;
+      max-width: 360px;
       text-align: center;
-      box-shadow: 0 20px 70px #0008;
     }
-    .logo {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      background: #fff;
-      color: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      margin: 0 auto 20px;
+
+    .icon {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 24px;
+      border: 3px solid #ededed;
+      border-top-color: #171717;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
     }
+
     h1 {
-      margin: 0 0 10px;
-      font-size: 27px;
+      margin: 0 0 12px;
+      font-size: 24px;
+      font-weight: 700;
     }
-    .sub {
-      color: #a7a7b2;
-      line-height: 1.55;
-      margin: 0 0 22px;
+
+    p {
+      color: #737373;
+      font-size: 15px;
+      line-height: 1.6;
     }
-    .error {
-      color: #ff7373;
-      margin-top: 15px;
-    }
-    button {
-      border: 0;
-      border-radius: 12px;
-      padding: 14px 18px;
-      background: #fff;
+
+    a {
+      display: inline-block;
+      margin-top: 12px;
       color: #111;
-      font-weight: 800;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 4px;
     }
-    button:hover {
-      opacity: 0.9;
+
+    .error {
+      color: #c62828;
     }
-    .hidden {
-      display: none;
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .icon { animation: none; }
     }
   </style>
 </head>
+
 <body>
-  <main class="card">
-    <div class="logo">OTA</div>
-    <h1>Install App</h1>
-    <p id="status" class="sub">
-      Preparing your installation link...
+  <main>
+    <div class="icon" id="spinner"></div>
+
+    <h1 id="heading">Preparing install...</h1>
+
+    <p id="message">
+      Please wait while we open the installation link.
     </p>
-    <button id="install" class="hidden">
-      Install App
-    </button>
-    <p id="error" class="error"></p>
+
+    <a id="fallback" href="#" hidden>
+      Click here if nothing happens
+    </a>
+
+    <p id="error" class="error" hidden></p>
   </main>
+
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const ota = params.get("ota");
-    const status = document.getElementById("status");
-    const button = document.getElementById("install");
+    const params = new URLSearchParams(location.search);
+    const otaUrl = params.get("ota");
+
+    const fallback = document.getElementById("fallback");
+    const message = document.getElementById("message");
     const error = document.getElementById("error");
-    if (!ota || !/^itms-services:\/\//i.test(ota)) {
-      status.textContent = "";
-      error.textContent =
-        "This installation link is invalid or incomplete.";
+    const spinner = document.getElementById("spinner");
+
+    if (!otaUrl || !/^itms-services:\/\//i.test(otaUrl)) {
+      spinner.hidden = true;
+      message.hidden = true;
+      error.hidden = false;
+      error.textContent = "Invalid or missing installation link.";
     } else {
-      status.textContent =
-        "Tap below to start installing the app on your iPhone or iPad.";
-      button.classList.remove("hidden");
-      button.addEventListener("click", () => {
-        window.location.href = ota;
-      });
+      // Provide a direct fallback for browsers that block automatic opening.
+      fallback.href = otaUrl;
+      fallback.hidden = false;
+
+      // Attempt to open the iOS OTA installation URL.
+      // The fallback remains available if the browser blocks this.
+      window.location.href = otaUrl;
     }
   </script>
 </body>
